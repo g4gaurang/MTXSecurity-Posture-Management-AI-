@@ -142,13 +142,16 @@ function Lifecycle() {
 }
 
 const ecosystemNodes = [
-  { name: 'Benefits Assistant', type: 'Application', x: 90, y: 80, risk: 'Moderate' },
-  { name: 'Case Summary Agent', type: 'Agent', x: 90, y: 210, risk: 'High' },
-  { name: 'Internal Knowledge Base', type: 'Dataset', x: 300, y: 45, risk: 'Low' },
-  { name: 'Document Repository', type: 'Retrieval', x: 300, y: 145, risk: 'Moderate' },
-  { name: 'API Tool', type: 'Tool', x: 300, y: 245, risk: 'High' },
-  { name: 'External Model Provider', type: 'Provider', x: 515, y: 80, risk: 'Moderate' },
-  { name: 'Human Reviewer', type: 'Control', x: 515, y: 210, risk: 'Low' },
+  { name: 'Benefits Assistant', type: 'Application', x: 90, y: 55, risk: 'Moderate' },
+  { name: 'Document Review Service', type: 'Application', x: 90, y: 135, risk: 'High' },
+  { name: 'Staff Knowledge Assistant', type: 'Application', x: 90, y: 215, risk: 'Moderate' },
+  { name: 'Forecasting Model', type: 'Model', x: 90, y: 295, risk: 'Moderate' },
+  { name: 'Internal Knowledge Base', type: 'Dataset', x: 300, y: 55, risk: 'Low' },
+  { name: 'Document Repository', type: 'Retrieval', x: 300, y: 135, risk: 'Moderate' },
+  { name: 'Case Summary Agent', type: 'Agent', x: 300, y: 215, risk: 'High' },
+  { name: 'API Tool', type: 'Tool', x: 300, y: 295, risk: 'High' },
+  { name: 'External Model Provider', type: 'Provider', x: 515, y: 95, risk: 'Moderate' },
+  { name: 'Human Reviewer', type: 'Control', x: 515, y: 255, risk: 'Low' },
 ]
 
 function Ecosystem() {
@@ -163,10 +166,10 @@ function Ecosystem() {
     </div>
     <div className="map-layout">
       <div className="map-card">
-        <svg className="ecosystem-svg" viewBox="0 0 650 300" role="img" aria-labelledby="map-title map-desc">
+        <svg className="ecosystem-svg" viewBox="0 0 650 350" role="img" aria-labelledby="map-title map-desc">
           <title id="map-title">Illustrative AI ecosystem relationship map</title>
           <desc id="map-desc">Benefits Assistant and Case Summary Agent connect to data, retrieval, tool, provider, and human review assets.</desc>
-          <g className="edges" aria-hidden="true"><path d="M150 80H275M150 95L275 145M150 210L275 155M150 210L275 245M365 45L490 80M365 145L490 90M365 245L490 210M150 210H490" /></g>
+          <g className="edges" aria-hidden="true"><path d="M150 55H235M150 135H235M150 215H235M150 295H235M365 55L450 95M365 135L450 95M365 215L450 255M365 295L450 255M150 135L235 215M150 215L235 135" /></g>
           {visible.map(n => <g key={n.name} role="button" tabIndex={0} aria-label={`${n.name}, ${n.type}, ${n.risk} risk`} onClick={() => setSelected(n)} onKeyDown={(e: KeyboardEvent<SVGGElement>) => (e.key === 'Enter' || e.key === ' ') && setSelected(n)} className={`svg-node ${selected.name === n.name ? 'selected' : ''}`} transform={`translate(${n.x} ${n.y})`}>
             <rect x="-65" y="-25" width="130" height="50" rx="10" /><text textAnchor="middle" y="-3">{n.name.length > 19 ? `${n.name.slice(0, 18)}…` : n.name}</text><text className="node-type" textAnchor="middle" y="14">{n.type}</text>
           </g>)}
