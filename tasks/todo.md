@@ -28,4 +28,6 @@ The GitHub Pages workflow runs on updates to `main`. Deployment therefore awaits
 - [x] Add current-section state to primary navigation.
 - [x] Announce inventory filtering and sorting changes.
 - [x] Add text and table alternatives for analytics charts.
-- [ ] Recheck lint, build, and narrow-screen behavior.
+- [x] Recheck lint, build, and narrow-screen behavior.
+
+Follow-up verification passed. At 320 pixels, the page had no page-level overflow, analytics data tables remained readable, and the mobile menu worked with pointer, Enter, and Space activation. The initial menu failure could not be reproduced after a fresh page load.
