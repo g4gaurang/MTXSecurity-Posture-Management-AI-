@@ -184,12 +184,21 @@ function Ecosystem() {
 
 function DetailDrawer({ item, close }: { item: InventoryItem; close: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null)
+  const drawerRef = useRef<HTMLElement>(null)
   useEffect(() => {
     closeRef.current?.focus()
     const handler = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && close()
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [close])
+  const keepFocusInDrawer = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key !== 'Tab' || !drawerRef.current) return
+    const elements = [...drawerRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]')]
+    const first = elements[0]
+    const last = elements[elements.length - 1]
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus() }
+    if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus() }
+  }
   const sections = [
     ['Intended use', item.purpose], ['Prohibited use', item.prohibited], ['Owner', item.owner], ['Users', 'Approved staff or public users by deployment'],
     ['Data sources', `${item.data} sources documented in the asset record`], ['Models', item.model], ['Agents and tools', item.name.includes('Agent') ? 'Knowledge search · Draft creation' : 'No agent tools documented'],
@@ -197,7 +206,7 @@ function DetailDrawer({ item, close }: { item: InventoryItem; close: () => void 
     ['Runtime events', `${Math.max(item.findings * 3, 2)} illustrative events`], ['Change history', 'Model record updated 08 Sep 2026'],
   ]
   return <div className="drawer-backdrop" role="presentation" onMouseDown={e => e.target === e.currentTarget && close()}>
-    <aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <aside ref={drawerRef} className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" onKeyDown={keepFocusInDrawer}>
       <div className="drawer-head"><div><Label>AI system record · Illustrative</Label><h2 id="drawer-title">{item.name}</h2></div><button ref={closeRef} className="icon-button" onClick={close}><X /><span className="sr-only">Close details</span></button></div>
       <p className="drawer-description">{item.description}</p>
       <div className="drawer-status"><span className={`status ${statusTone(item.approval)}`}>{item.approval}</span><span>{item.findings} open findings</span><span>Review: {item.review}</span></div>
@@ -214,6 +223,15 @@ function Inventory() {
   const [sortAsc, setSortAsc] = useState(true)
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<InventoryItem | null>(null)
+  const previousFocus = useRef<HTMLElement | null>(null)
+  const openRecord = (item: InventoryItem) => {
+    previousFocus.current = document.activeElement as HTMLElement
+    setSelected(item)
+  }
+  const closeRecord = () => {
+    setSelected(null)
+    requestAnimationFrame(() => previousFocus.current?.focus())
+  }
   const filtered = useMemo(() => inventory.filter(item => {
     const tabMatch = tab === 'Registered' || item.approval.toLowerCase() === tab.toLowerCase() || (tab === 'Under review' && item.assessment === 'Under review')
     return tabMatch && `${item.name} ${item.purpose} ${item.owner}`.toLowerCase().includes(search.toLowerCase())
@@ -225,11 +243,11 @@ function Inventory() {
     <Tabs items={tabs} active={tab} onChange={value => { setTab(value); setPage(1) }} label="Inventory status" />
     <div className="table-toolbar"><label className="search-box"><Search size={17} /><span className="sr-only">Search inventory</span><input value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} placeholder="Search systems, purpose, owner" /></label><button className="button secondary small" onClick={() => setSortAsc(!sortAsc)}>Sort {sortAsc ? 'A–Z' : 'Z–A'} <ChevronDown size={15} /></button></div>
     <div className="table-scroll"><table className="inventory-table"><caption className="sr-only">Illustrative AI system inventory</caption><thead><tr>{['AI system', 'Business purpose', 'Owner', 'Model or provider', 'Data', 'Stage', 'Criticality', 'Assessment', 'Approval', 'Findings', 'Next review'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead>
-      <tbody>{rows.map(item => <tr key={item.id} onClick={() => setSelected(item)}><th scope="row"><button className="row-link" onClick={() => setSelected(item)}>{item.name}<ChevronRight size={15} /></button></th><td>{item.purpose}</td><td>{item.owner}</td><td>{item.model}</td><td>{item.data}</td><td>{item.stage}</td><td><span className={`status ${statusTone(item.criticality)}`}>{item.criticality}</span></td><td>{item.assessment}</td><td><span className={`status ${statusTone(item.approval)}`}>{item.approval}</span></td><td>{item.findings}</td><td>{item.review}</td></tr>)}</tbody></table></div>
+      <tbody>{rows.map(item => <tr key={item.id} onClick={() => openRecord(item)}><th scope="row"><button className="row-link" onClick={() => openRecord(item)}>{item.name}<ChevronRight size={15} /></button></th><td>{item.purpose}</td><td>{item.owner}</td><td>{item.model}</td><td>{item.data}</td><td>{item.stage}</td><td><span className={`status ${statusTone(item.criticality)}`}>{item.criticality}</span></td><td>{item.assessment}</td><td><span className={`status ${statusTone(item.approval)}`}>{item.approval}</span></td><td>{item.findings}</td><td>{item.review}</td></tr>)}</tbody></table></div>
     {rows.length === 0 && <p className="empty-state">No fictional records match these filters.</p>}
     <div className="pagination"><span>Page {page} of {pages} · {filtered.length} records</span><div><button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button><button disabled={page === pages} onClick={() => setPage(page + 1)}>Next</button></div></div>
     <p className="illustrative">Illustrative product data</p>
-    {selected && <DetailDrawer item={selected} close={() => setSelected(null)} />}
+    {selected && <DetailDrawer item={selected} close={closeRecord} />}
   </section>
 }
 
