@@ -37,6 +37,7 @@ p { line-height: 1.65; }
 .nav { display: flex; align-items: center; gap: 1.35rem; font-size: .84rem; }
 .nav > a { color: #d6e0e9; text-decoration: none; white-space: nowrap; }
 .nav > a:not(.button):hover { color: white; }
+.nav > a[aria-current="location"]:not(.button) { color: white; box-shadow: inset 0 -2px var(--cyan); }
 .menu-button { display: none; width: 44px; height: 44px; place-items: center; color: white; border: 1px solid #415166; background: transparent; border-radius: 9px; }
 .button { border: 1px solid var(--blue); color: white; background: var(--blue); border-radius: 8px; padding: .82rem 1rem; display: inline-flex; justify-content: center; align-items: center; gap: .5rem; text-decoration: none; font-weight: 700; cursor: pointer; }
 .button:hover { background: #2858cc; }
@@ -316,6 +317,10 @@ thead th { color: #58697b; background: #f2f5f7; font-size: .67rem; text-transfor
 .chart-card > div:first-child { display: flex; flex-direction: column; gap: .3rem; }
 .chart-legend { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; margin: 0; padding: 0; list-style: none; font-size: .68rem; }
 .chart-legend span { width: 8px; height: 8px; display: inline-block; margin-right: .35rem; border-radius: 2px; }
+.chart-data { margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--line); font-size: .72rem; }
+.chart-data summary { color: var(--blue); }
+.chart-data table { margin-top: .5rem; }
+.chart-data th, .chart-data td { padding: .45rem; }
 .role-layout { display: grid; grid-template-columns: 300px 1fr; border: 1px solid var(--line); background: white; }
 .role-list { padding: .7rem; border-right: 1px solid var(--line); }
 .role-list button { min-height: 48px; width: 100%; padding: .6rem .7rem; display: flex; justify-content: space-between; align-items: center; border: 0; background: transparent; text-align: left; cursor: pointer; }

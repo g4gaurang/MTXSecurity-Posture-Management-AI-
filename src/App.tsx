@@ -35,9 +35,25 @@ function Tabs({ items, active, onChange, label }: { items: string[]; active: str
   </div>
 }
 
+const navLinks = [
+  ['Overview', 'overview'], ['AI Inventory', 'inventory'], ['Risk', 'risk'],
+  ['Guardrails', 'guardrails'], ['Runtime', 'runtime'], ['Governance', 'governance'], ['Analytics', 'analytics'],
+]
+
 function Header() {
   const [open, setOpen] = useState(false)
-  const links = ['Overview', 'AI Inventory', 'Risk', 'Guardrails', 'Runtime', 'Governance', 'Analytics']
+  const [active, setActive] = useState('overview')
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+      if (visible) setActive(visible.target.id)
+    }, { rootMargin: '-25% 0px -60%', threshold: [0, .2, .5] })
+    navLinks.forEach(([, id]) => {
+      const section = document.getElementById(id)
+      if (section) observer.observe(section)
+    })
+    return () => observer.disconnect()
+  }, [])
   return <header className="site-header">
     <a className="brand" href="#top" aria-label="MTX AISPM home">
       <span className="brand-mark"><Network size={22} /></span>
@@ -47,7 +63,7 @@ function Header() {
       {open ? <X /> : <Menu />}<span className="sr-only">Menu</span>
     </button>
     <nav id="site-nav" className={open ? 'nav open' : 'nav'} aria-label="Primary">
-      {links.map(link => <a key={link} href={`#${link.toLowerCase().replace('ai ', '').replace(' ', '-')}`} onClick={() => setOpen(false)}>{link}</a>)}
+      {navLinks.map(([label, id]) => <a key={id} href={`#${id}`} aria-current={active === id ? 'location' : undefined} onClick={() => { setOpen(false); setActive(id) }}>{label}</a>)}
       <a className="button small" href="#contact" onClick={() => setOpen(false)}>Request a Demo</a>
     </nav>
   </header>
@@ -242,7 +258,8 @@ function Inventory() {
     <SectionTitle eyebrow="AI inventory workspace" title="Connect each AI system to an accountable record" copy="Search and review fictional system records. Inventory scope reflects configured integrations and owner-provided information." id="inventory-title" />
     <Tabs items={tabs} active={tab} onChange={value => { setTab(value); setPage(1) }} label="Inventory status" />
     <div className="table-toolbar"><label className="search-box"><Search size={17} /><span className="sr-only">Search inventory</span><input value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} placeholder="Search systems, purpose, owner" /></label><button className="button secondary small" onClick={() => setSortAsc(!sortAsc)}>Sort {sortAsc ? 'A–Z' : 'Z–A'} <ChevronDown size={15} /></button></div>
-    <div className="table-scroll"><table className="inventory-table"><caption className="sr-only">Illustrative AI system inventory</caption><thead><tr>{['AI system', 'Business purpose', 'Owner', 'Model or provider', 'Data', 'Stage', 'Criticality', 'Assessment', 'Approval', 'Findings', 'Next review'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead>
+    <p className="sr-only" role="status" aria-live="polite">Showing {filtered.length} fictional records, sorted by AI system {sortAsc ? 'ascending' : 'descending'}.</p>
+    <div className="table-scroll"><table className="inventory-table"><caption className="sr-only">Illustrative AI system inventory</caption><thead><tr>{['AI system', 'Business purpose', 'Owner', 'Model or provider', 'Data', 'Stage', 'Criticality', 'Assessment', 'Approval', 'Findings', 'Next review'].map((h, i) => <th key={h} scope="col" aria-sort={i === 0 ? (sortAsc ? 'ascending' : 'descending') : undefined}>{h}</th>)}</tr></thead>
       <tbody>{rows.map(item => <tr key={item.id} onClick={() => openRecord(item)}><th scope="row"><button className="row-link" onClick={() => openRecord(item)}>{item.name}<ChevronRight size={15} /></button></th><td>{item.purpose}</td><td>{item.owner}</td><td>{item.model}</td><td>{item.data}</td><td>{item.stage}</td><td><span className={`status ${statusTone(item.criticality)}`}>{item.criticality}</span></td><td>{item.assessment}</td><td><span className={`status ${statusTone(item.approval)}`}>{item.approval}</span></td><td>{item.findings}</td><td>{item.review}</td></tr>)}</tbody></table></div>
     {rows.length === 0 && <p className="empty-state">No fictional records match these filters.</p>}
     <div className="pagination"><span>Page {page} of {pages} · {filtered.length} records</span><div><button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button><button disabled={page === pages} onClick={() => setPage(page + 1)}>Next</button></div></div>
@@ -408,8 +425,8 @@ function Analytics() {
     <SectionTitle eyebrow="Analytics and recommended measures" title="Review posture signals without treating metrics as outcomes" copy="Every value below is fictional and demonstrates a potential product view." id="analytics-title" />
     <Tabs items={Object.keys(groups)} active={active} onChange={setActive} label="Analytics category" />
     <div className="analytics-grid"><div className="analytics-metrics">{groups[active as keyof typeof groups].map(([label, value]) => <div key={label}><small>{label}</small><strong>{value}</strong><span>Illustrative product data</span></div>)}</div>
-      <div className="chart-card"><div><strong>Findings by risk domain</strong><small>Illustrative product data</small></div><ResponsiveContainer width="100%" height={230}><BarChart data={chartData} margin={{ left: -20 }}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#dfe5eb" /><XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} /><Tooltip /><Bar dataKey="value" fill="#3769e8" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div>
-      <div className="chart-card"><div><strong>Portfolio approval state</strong><small>Illustrative product data</small></div><ResponsiveContainer width="100%" height={180}><PieChart><Pie data={pieData} dataKey="value" nameKey="name" innerRadius={48} outerRadius={76}>{pieData.map((_, i) => <Cell key={i} fill={colors[i]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer><ul className="chart-legend">{pieData.map((x, i) => <li key={x.name}><span style={{ background: colors[i] }} />{x.name}: {x.value}</li>)}</ul></div></div>
+      <div className="chart-card"><div><strong>Findings by risk domain</strong><small>Illustrative product data</small></div><p className="sr-only">Bar chart: Security 11, Privacy 7, Behavior 9, Third party 6, and Governance 8 findings.</p><div aria-hidden="true"><ResponsiveContainer width="100%" height={230}><BarChart data={chartData} margin={{ left: -20 }}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#dfe5eb" /><XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} /><Tooltip /><Bar dataKey="value" fill="#3769e8" radius={[5, 5, 0, 0]} /></BarChart></ResponsiveContainer></div><details className="chart-data"><summary>View findings data</summary><table><thead><tr><th scope="col">Risk domain</th><th scope="col">Findings</th></tr></thead><tbody>{chartData.map(item => <tr key={item.name}><th scope="row">{item.name}</th><td>{item.value}</td></tr>)}</tbody></table></details></div>
+      <div className="chart-card"><div><strong>Portfolio approval state</strong><small>Illustrative product data</small></div><p className="sr-only">Donut chart: 14 approved, 6 under review, 3 restricted, and 1 ownership required.</p><div aria-hidden="true"><ResponsiveContainer width="100%" height={180}><PieChart><Pie data={pieData} dataKey="value" nameKey="name" innerRadius={48} outerRadius={76}>{pieData.map((_, i) => <Cell key={i} fill={colors[i]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer></div><ul className="chart-legend">{pieData.map((x, i) => <li key={x.name}><span style={{ background: colors[i] }} />{x.name}: {x.value}</li>)}</ul><details className="chart-data"><summary>View approval data</summary><table><thead><tr><th scope="col">Approval state</th><th scope="col">Systems</th></tr></thead><tbody>{pieData.map(item => <tr key={item.name}><th scope="row">{item.name}</th><td>{item.value}</td></tr>)}</tbody></table></details></div></div>
   </section>
 }
 

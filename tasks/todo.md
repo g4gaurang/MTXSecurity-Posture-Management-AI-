@@ -22,3 +22,10 @@ Verification completed:
 - Keyboard focus, Escape-to-close behavior, mobile navigation, local form validation, console output, and page-level overflow were reviewed.
 
 The GitHub Pages workflow runs on updates to `main`. Deployment therefore awaits review and merge of the feature branch, followed by selection of GitHub Actions as the Pages source if the repository has not already been configured.
+
+## Follow-up accessibility review
+
+- [x] Add current-section state to primary navigation.
+- [x] Announce inventory filtering and sorting changes.
+- [x] Add text and table alternatives for analytics charts.
+- [ ] Recheck lint, build, and narrow-screen behavior.
